@@ -1,26 +1,20 @@
-import { ReactNode, useEffect, useState } from 'react';
-import IntegratedAppForm from '@/components/app-form/integrated-app-form';
-import AppInput from '@/components/app-input/app-input';
+import { ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { z } from 'zod';
+import { Input } from '@/components/ui/input';
+import { Copy } from '@/components/icons/copy';
+import { useGetUserByIdQuery } from '@/redux/services/users.service';
 import { useAppSelector } from '@/redux/store';
-import {
-  useDepositTransactionMutation,
-  useGetDepositsQuery,
-} from '@/redux/services/deposits.service';
-import { CircleHelp, TriangleAlert } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import ValueWithCopyIcon from '@/components/value-with-copy-icon/value-with-copy-icon';
-import { toast } from '@/hooks/use-toast';
-import { getTransferDetailsBySignature } from '@/utils/web3-utils';
-import { useConnection } from '@solana/wallet-adapter-react';
-import { useRouter } from 'next/router';
-import { truncateWallet } from '@/utils/common';
+import { useDispatch } from 'react-redux';
 import {
   closeAlertDialog,
   openAlertDialog,
 } from '@/redux/features/modal-slice';
-import { useDispatch } from 'react-redux';
+import { toast } from '@/hooks/use-toast';
+import { useRouter } from 'next/router';
+import { useConnection } from '@solana/wallet-adapter-react';
+import { useGetDepositsQuery, useDepositTransactionMutation } from '@/redux/services/deposits.service';
+import { getTransferDetailsBySignature } from '@/utils/web3-utils';
+import { z } from 'zod';
 
 const schema = z.object({
   transactionId: z
@@ -30,19 +24,11 @@ const schema = z.object({
     .regex(/^[1-9A-HJ-NP-Za-km-z]{43,88}$/, {
       message: 'Invalid transaction ID format',
     }),
-  network: z.string(),
 });
 
-type FormValues = z.infer<typeof schema>;
-
-const defaultValues: FormValues = {
-  transactionId: '',
-  network: '',
-};
-
 const DepositPage = (): ReactNode => {
-  const router = useRouter();
   const dispatch = useDispatch();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { connection } = useConnection();
   const { user } = useAppSelector((store) => store.appState);
@@ -52,86 +38,31 @@ const DepositPage = (): ReactNode => {
     page: 0,
     limit: 0,
   });
+  const { data } = useGetUserByIdQuery({ id: user.id }, { skip: !user?.id });
+  const [transactionId, setTransactionId] = useState('');
 
-  const [formattedWallet, setFormattedWallet] = useState(user?.walletPublicKey);
+  if (!data?.user) {
+    return <div className="mt-6">Loading....</div>;
+  }
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 320) {
-        setFormattedWallet(truncateWallet(user?.walletPublicKey || '', 6));
-      } else if (window.innerWidth < 440) {
-        setFormattedWallet(truncateWallet(user?.walletPublicKey || '', 8));
-      } else if (window.innerWidth < 880) {
-        setFormattedWallet(truncateWallet(user?.walletPublicKey || '', 16));
-      } else {
-        setFormattedWallet(user?.walletPublicKey);
-      }
-    };
+  const depositWallet = user?.walletPublicKey;
 
-    // Initial check
-    handleResize();
-
-    // Listen for resize events
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup listener on unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [user?.walletPublicKey]);
-
-  const handleHowToFindTxClick = () => {
-    dispatch(
-      openAlertDialog({
-        title: 'How to Deposit',
-        descriptionNode: (
-          <div>
-            <p>
-              To complete the process, please follow the steps below to find
-              your transaction ID (signature):
-            </p>
-            <ol className="list-decimal ml-6 mt-2">
-              <li className="mb-2 text-start">
-                Visit the transaction history for your wallet by going to{' '}
-                <a
-                  href={`https://solscan.io/account/${user.walletPublicKey}#transfers`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  your wallet address
-                </a>
-                .
-              </li>
-              <li className="mb-2 text-start">
-                Look for the transaction you just made. Note that it may take
-                1-5 minutes for the transaction to appear and be approved on the
-                blockchain.
-              </li>
-              <li className="mb-2 text-start">
-                Once the transaction is visible, copy its{' '}
-                <strong>signature (transaction ID)</strong>.
-              </li>
-              <li className="mb-2 text-start">
-                <strong>Only USDC is accepted!</strong>.
-              </li>
-            </ol>
-            <p className="mt-2">
-              After copying the transaction ID, enter it in the input field
-              below to validate your deposit. Please be patient while the
-              blockchain processes your transaction.
-            </p>
-          </div>
-        ),
-        onPress: async () => {
-          dispatch(closeAlertDialog());
-        },
-      }),
-    );
+  const handleCopy = () => {
+    navigator.clipboard.writeText(depositWallet);
   };
 
-  const handleSubmit = async (submitValues: FormValues) => {
-    const { transactionId } = submitValues;
+  const handleValidateDeposit = async () => {
+    if (!transactionId) return;
+    
+    try {
+      if (!schema.parse({ transactionId })) return;
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid transaction ID format',
+      });
+      return;
+    }
 
     setIsLoading(true);
     const existingDeposit = userDeposits?.items.find(
@@ -199,70 +130,146 @@ const DepositPage = (): ReactNode => {
     setIsLoading(false);
   };
 
+  const handleHowToFindTxClick = () => {
+    dispatch(
+      openAlertDialog({
+        title: 'How to Deposit',
+        descriptionNode: (
+          <div>
+            <p>
+              To complete the process, please follow the steps below to find
+              your transaction ID (signature):
+            </p>
+            <ol className="list-decimal ml-6 mt-2">
+              <li className="mb-2 text-start">
+                Visit the transaction history for your wallet by going to{' '}
+                <a
+                  href={`https://solscan.io/account/${user.walletPublicKey}#transfers`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  your wallet address
+                </a>
+                .
+              </li>
+              <li className="mb-2 text-start">
+                Look for the transaction you just made. Note that it may take
+                1-5 minutes for the transaction to appear and be approved on the
+                blockchain.
+              </li>
+              <li className="mb-2 text-start">
+                Once the transaction is visible, copy its{' '}
+                <strong>signature (transaction ID)</strong>.
+              </li>
+              <li className="mb-2 text-start">
+                <strong>Only USDC is accepted!</strong>.
+              </li>
+            </ol>
+            <p className="mt-2">
+              After copying the transaction ID, enter it in the input field
+              below to validate your deposit. Please be patient while the
+              blockchain processes your transaction.
+            </p>
+          </div>
+        ),
+        onPress: async () => {
+          dispatch(closeAlertDialog());
+        },
+      }),
+    );
+  };
+
   return (
-    <div className="mt-6">
-      <h1 className="text-3xl">Deposit</h1>
-      <div className="my-6 w-1/2 max-[1400px]:w-full">
-        <IntegratedAppForm<FormValues>
-          defaultValues={defaultValues}
-          onSubmit={handleSubmit}
-          schema={schema}
-        >
-          <p>Your Deposit wallet:</p>
-          <div className="max-[1036px]:flex-col">
-            <div className="max-[1036px]:mt-4">
-              <ValueWithCopyIcon
-                value={user?.walletPublicKey}
-                formattedValue={formattedWallet}
-              />
+    <div className="mt-6 px-4 md:px-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Deposit</h1>
+
+      <div className="relative rounded-xl border-2 border-gray-800 transition-all p-4 md:p-6 backdrop-blur-sm bg-white/5">
+        <h2 className="text-lg md:text-xl font-bold mb-4">
+          Your Deposit wallet
+        </h2>
+
+        <div className="flex flex-col items-center space-y-6">
+          <div className="w-full">
+            <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-800 bg-black/20">
+              <span className="text-sm text-gray-300 break-all">
+                {depositWallet}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-gray-400 hover:text-gray-300"
+                onClick={handleCopy}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
-            <QRCodeSVG
-              value={user?.walletPublicKey}
-              size={220}
-              height={220}
-              width={220}
-              bgColor="#c1c1c1"
+          </div>
+
+          <div className="p-4 bg-white rounded-xl">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${depositWallet}`}
+              alt="QR Code"
+              width={200}
+              height={200}
             />
           </div>
-          <div className="bg-[rgba(190,81,5,0.7)] rounded-xl flex p-2">
-            <div>
-              <TriangleAlert size={32} className="mr-2 mt-2" />
-            </div>
-            <div className="max-[490px]:text-sm">
-              <p className="mt-2 font-bold mb-2">SEND ONLY USDC</p>
-              <p className="mb-2">
-                In order to receive your funds upon successful deposit, please
-                provide us with the transaction id (signature), so we can charge
-                the funds to your account via "Confirm Deposit" button.
-              </p>
-            </div>
-          </div>
-          <Button
-            className="flex cursor-pointer"
-            onClick={handleHowToFindTxClick}
-            variant="secondary"
-          >
-            <CircleHelp />
-            <p className="ml-2">How to deposit?</p>
-          </Button>
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : (
-            <>
-              <AppInput
-                labelText="Transaction Id"
-                labelId="transactionId"
-                name="transactionId"
-                placeholder="Transaction Id..."
-                className="text-gray-400"
-              />
-              <Button type="submit" className="w-full">
-                Confirm transaction
-              </Button>
-            </>
-          )}
-        </IntegratedAppForm>
+        </div>
       </div>
+
+      <div className="mt-6 relative rounded-xl border-2 border-orange-900/50 transition-all p-4 md:p-6 backdrop-blur-sm bg-orange-500/5">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <h3 className="font-semibold text-orange-400 mb-1">
+              SEND ONLY USDC
+            </h3>
+            <p className="text-sm text-orange-300/80">
+              In order to receive your funds upon successful deposit, please
+              provide us with the transaction id (signature), so we can charge
+              the funds to your account via "Confirm Deposit" button.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 relative rounded-xl border-2 border-gray-800 transition-all p-4 md:p-6 backdrop-blur-sm bg-white/5">
+        <h2 className="text-lg md:text-xl font-bold mb-4">
+          Confirm Transaction
+        </h2>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Transaction Id
+            </label>
+            <Input
+              type="text"
+              placeholder="Transaction Id..."
+              className="bg-transparent border-gray-700 focus:border-blue-500"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+            />
+          </div>
+
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={handleValidateDeposit}
+            disabled={!transactionId || isLoading}
+          >
+            {isLoading ? 'Validating...' : 'Confirm transaction'}
+          </Button>
+        </div>
+      </div>
+
+      <Button
+        variant="ghost"
+        className="mt-6 text-sm text-gray-400 hover:text-gray-300"
+        onClick={handleHowToFindTxClick}
+      >
+        How to deposit?
+      </Button>
     </div>
   );
 };

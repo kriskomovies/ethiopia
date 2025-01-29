@@ -1,62 +1,52 @@
-import { ReactNode, useEffect, useState, useRef, FC } from 'react';
-import InfoBox from '@/components/info-box/info-box';
-import { QRCodeSVG } from 'qrcode.react';
 import ValueWithCopyIcon from '@/components/value-with-copy-icon/value-with-copy-icon';
-import { useAppSelector } from '@/redux/store';
-import {
-  useGetUserByIdQuery,
-  useGetUserMembersQuery,
-} from '@/redux/services/users.service';
-import { useDispatch } from 'react-redux';
-import { Button } from '@/components/ui/button';
-import { CircleHelp } from 'lucide-react';
-import Tree from 'react-d3-tree';
 import {
   closeAlertDialog,
   openAlertDialog,
 } from '@/redux/features/modal-slice';
+import {
+  useGetUserByIdQuery,
+  useGetUserMembersQuery,
+} from '@/redux/services/users.service';
+import { useAppSelector } from '@/redux/store';
+import { HelpCircle, QrCode } from 'lucide-react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import Tree, { PathFunctionOption } from 'react-d3-tree';
+import { useDispatch } from 'react-redux';
 
 // Custom node component for the tree
-const CustomNode: FC<any> = ({ nodeDatum }) => (
-  <g>
-    <foreignObject
-      x="-150"
-      y={nodeDatum.name === 'You' ? '-80' : '-50'}
-      width="300"
-      height={nodeDatum.name === 'You' ? '140' : '120'}
-      style={{ overflow: 'visible' }}
-    >
-      <div
-        className={`p-4 backdrop-blur-sm rounded-xl border shadow-lg hover:border-white/30 transition-all
-        ${
-          nodeDatum.name === 'You'
-            ? 'bg-blue-500/20 border-blue-500/50'
-            : 'bg-black/40 border-white/10'
-        }`}
+const CustomNode: FC<any> = ({ nodeDatum }) => {
+  const isActive = nodeDatum.status === 'ACTIVE';
+  return (
+    <g>
+      <foreignObject
+        x="-150"
+        y="-50"
+        width="300"
+        height="120"
+        style={{ overflow: 'visible', clipPath: 'inset(0 0 -100% 0)' }}
       >
-        <div className="space-y-1.5 text-left">
-          <h3
-            className={`font-medium text-lg ${
-              nodeDatum.name === 'You' ? 'text-blue-400' : 'text-white'
-            }`}
-          >
-            {nodeDatum.name}
-          </h3>
-          <div className="space-y-1 text-sm">
-            <div className="text-white/80">Balance: ${nodeDatum.balance}</div>
-            <div className="text-white/80">Status: {nodeDatum.status}</div>
-            <div className="text-white/80">Joined: {nodeDatum.joinedDate}</div>
+        <div
+          className={`p-4 backdrop-blur-md rounded-xl border ${
+            isActive ? 'border-green-500' : 'border-white/10'
+          } bg-black/40 shadow-lg`}
+        >
+          <div className="space-y-1.5 text-left">
+            <h3 className="font-medium text-lg text-white">{nodeDatum.name}</h3>
+            <div className="space-y-1 text-sm">
+              <div className="text-white/60">
+                Earnings: ${nodeDatum.balance}
+              </div>
+              <div className="text-white/60">
+                Joined: {nodeDatum.joinedDate}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </foreignObject>
-    {nodeDatum.name === 'You' ? (
-      <circle r="1" fill="white" cy="60" />
-    ) : (
+      </foreignObject>
       <circle r="1" fill="white" cy="-50" />
-    )}
-  </g>
-);
+    </g>
+  );
+};
 
 const TeamPage = (): ReactNode => {
   const dispatch = useDispatch();
@@ -158,90 +148,122 @@ const TeamPage = (): ReactNode => {
     );
   };
 
+  // Add this function to check if there are any active members
+  const hasActiveMembers = (members: any[]) => {
+    return members.some((member) => member.status === 'ACTIVE');
+  };
+
   return (
     <div className="mt-6">
-      <h1 className="text-3xl">My Team ({members.length})</h1>
-      <div className="my-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2">
-        <InfoBox
-          title="Total earnings from team"
-          value={`${totalEarnings} USDC`}
-        />
+      <h1 className="text-2xl font-semibold mb-2">Your Referrals</h1>
+      <p className="text-white/60 mb-6">
+        Invite friends and earn rewards when they join and participate in our
+        platform. Monitor your referral activity and earnings below.
+      </p>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="backdrop-blur-md p-6 bg-black/40 rounded-xl border border-white/10">
+          <p className="text-white/60 mb-2">Total Earnings</p>
+          <p className="text-2xl font-semibold">${totalEarnings}</p>
+        </div>
+        <div className="backdrop-blur-md p-6 bg-black/40 rounded-xl border border-white/10">
+          <p className="text-white/60 mb-2">Active Referrals</p>
+          <p className="text-2xl font-semibold">
+            {members.filter((m) => m.status === 'ACTIVE').length}
+          </p>
+        </div>
       </div>
-      <div className="my-6">
-        <p className="mb-2">Your referral code QR:</p>
-        <div className="flex max-[1036px]:flex-col">
-          <QRCodeSVG
-            value={referralUrl}
-            size={220}
-            height={220}
-            width={220}
-            bgColor="#c1c1c1"
-          />
-          <div>
-            <div className="min-[1036px]:ml-4 max-[1036px]:mt-4">
-              <p>Referral code:</p>
-              <ValueWithCopyIcon value={id} isUnderline />
+
+      {/* Referral Link Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Your Referral Link</h2>
+        <p className="text-white/60 mb-4">
+          Share this link with friends to earn rewards when they join
+        </p>
+        <div className="backdrop-blur-md flex items-center justify-between gap-2 p-4 bg-black/40 rounded-xl border border-white/10">
+          <div className="flex-1">
+            <ValueWithCopyIcon value={referralUrl} />
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="cursor-pointer border-primary border-2 p-2 rounded-xl hover:scale-110 transition-all duration-100"
+              onClick={() => {
+                dispatch(
+                  openAlertDialog({
+                    title: 'QR Code',
+                    descriptionNode: (
+                      <div className="flex justify-center">
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${referralUrl}`}
+                          alt="QR Code"
+                          width={200}
+                          height={200}
+                        />
+                      </div>
+                    ),
+                    onPress: () => dispatch(closeAlertDialog()),
+                  }),
+                );
+              }}
+            >
+              <QrCode />
             </div>
-            <div className="min-[1036px]:ml-4 max-[1036px]:mt-4">
-              <p>Referral url:</p>
-              <ValueWithCopyIcon value={referralUrl} isUnderline />
+            <div
+              className="cursor-pointer border-primary border-2 p-2 rounded-xl hover:scale-110 transition-all duration-100"
+              onClick={onHowBonusesWorkClick}
+            >
+              <HelpCircle />
             </div>
           </div>
         </div>
       </div>
-      <Button
-        className="my-6"
-        variant="secondary"
-        onClick={onHowBonusesWorkClick}
-      >
-        <CircleHelp />
-        How do bonuses work?
-      </Button>
 
-      {/* Network Tree Visualization */}
-      <div className="mt-8 p-0.5 rounded-xl bg-gradient-to-r from-white/10 via-white/5 to-white/10">
-        <div className="w-full h-full bg-black/40 backdrop-blur-sm rounded-xl p-6">
-          <h2 className="text-xl font-medium text-white mb-6">
-            Member Network
-          </h2>
+      {/* Network Visualization */}
+
+      <div className="mb-8">
+        <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-6">
           <div
             ref={containerRef}
             style={{ width: '100%', height: '600px' }}
             className="relative"
           >
+            <div className="bg-black">
+              <h2 className="text-xl font-semibold mb-2">
+                Your Referral Network
+              </h2>
+              <p className="text-white/60 mb-4">
+                Visualize your referral network and their earnings
+              </p>
+            </div>
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="text-white loading-text">
-                  Loading network...
-                </div>
+                <div className="text-white/60">Loading network...</div>
               </div>
             ) : treeData.length > 0 ? (
               <Tree
                 data={treeData}
                 orientation="vertical"
-                renderCustomNodeElement={CustomNode}
+                renderCustomNodeElement={CustomNode as any}
                 separation={{ siblings: 2, nonSiblings: 2.5 }}
                 translate={{
                   x: dimensions.width / 2,
                   y: 200,
                 }}
-                nodeSize={{ x: 320, y: 350 }}
-                zoomable={true}
-                collapsible={false}
-                pathFunc="curve"
-                styles={{
-                  links: {
-                    stroke: '#ffffff',
-                    strokeWidth: 1.5,
-                    opacity: 0.7,
-                    fill: 'none',
-                  },
+                dimensions={{
+                  width: dimensions.width,
+                  height: 600,
                 }}
-                centeringTransitionDuration={200}
+                nodeSize={{ x: 320, y: 350 }}
+                zoom={1}
+                enableLegacyTransitions={true}
+                transitionDuration={200}
+                pathFunc={'curved' as PathFunctionOption}
+                pathClassFunc={() => 'text-white/20'}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <div className="text-white">No team members yet</div>
+                <div className="text-white/60">No team members yet</div>
               </div>
             )}
           </div>

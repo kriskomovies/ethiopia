@@ -6,7 +6,7 @@ import {
   useGetUserByIdQuery,
 } from '@/redux/services/users.service';
 import { addHours, differenceInHours, format, parseISO } from 'date-fns';
-import { CircleHelp, TriangleAlert } from 'lucide-react';
+import { CircleHelp, TriangleAlert, Timer } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from '@/hooks/use-toast';
 import InfoBox from '@/components/info-box/info-box';
@@ -82,7 +82,7 @@ const MiningPage = (): ReactNode => {
         descriptionNode: (
           <div>
             <p>
-              Collecting your rewards is simple and rewarding! Here’s how it
+              Collecting your rewards is simple and rewarding! Here's how it
               works:
             </p>
             <ol className="list-decimal ml-6 mt-2">
@@ -148,80 +148,169 @@ const MiningPage = (): ReactNode => {
     refetch();
   };
 
+  // Add this function to calculate actual daily streak
+  const calculateDailyStreak = (earnings: any[]) => {
+    if (!earnings?.length) return 0;
+
+    // Sort earnings by date in descending order
+    const sortedEarnings = [...earnings].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+
+    // Convert dates to YYYY-MM-DD format for comparison
+    const dates = sortedEarnings.map(
+      (earning) => new Date(earning.date).toISOString().split('T')[0],
+    );
+
+    let streak = 1;
+    let currentDate: any = dates[0];
+
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate: any = dates[i];
+
+      // Compare dates in YYYY-MM-DD format
+      const date1 = new Date(currentDate);
+      const date2 = new Date(prevDate);
+
+      const diffTime = date1.getTime() - date2.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) {
+        streak++;
+        currentDate = prevDate;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  };
+
   return (
-    <div className="flex flex-col h-screen justify-start">
-      <div>
-        <div className="w-full flex gap-2 flex-col sm:flex-row sm:px-0 py-4">
-          {dailyIncome > 0 && (
-            <InfoBox
-              title="Ability to generate more USDC"
-              value={format(
-                addHours(new Date(lastActivity), 24),
-                'MMM d, yyyy HH:mm:ss',
-              )}
+    <div className="mt-6 px-4 md:px-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
+        Claim Your Rewards
+      </h1>
+      <p className="text-gray-400 text-sm md:text-base mb-4">
+        Every 24 hours, your wallet accumulates rewards. Click the button below
+        to collect your earnings and keep mining!
+      </p>
+
+      <div className="my-4 md:my-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <InfoBox title="Available amount" value={`${balance} USDC`} />
+        {dailyIncome > 0 && (
+          <InfoBox
+            title="Next mining opportunity"
+            value={format(
+              addHours(new Date(lastActivity), 24),
+              'MMM d, yyyy HH:mm:ss',
+            )}
+          />
+        )}
+      </div>
+
+      <div className="relative rounded-xl border-2 border-gray-800 transition-all p-4 md:p-6 backdrop-blur-sm bg-white/5">
+        <h2 className="text-lg md:text-xl font-bold mb-4">Mining Progress</h2>
+        <p className="text-sm text-gray-400 mb-6">
+          Watch your rewards grow in real-time
+        </p>
+
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Mining Progress</p>
+              <p className="text-2xl font-bold">
+                {Math.min(100, Math.floor((diffHours / 24) * 100))}%
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Daily Streak</p>
+              <p className="text-2xl font-bold text-yellow-500">
+                {calculateDailyStreak(earnings)} Days
+              </p>
+            </div>
+          </div>
+
+          <div className="w-full bg-gray-800 rounded-full h-2.5">
+            <div
+              className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
+              style={{
+                width: `${Math.min(100, Math.floor((diffHours / 24) * 100))}%`,
+              }}
             />
-          )}
-          <InfoBox title="Balance" value={`${balance} USDC`} />
-        </div>
-        <Button
-          className="flex cursor-pointer mb-4"
-          onClick={onHowToCollectYourRewardsClick}
-          variant="secondary"
-        >
-          <CircleHelp />
-          <p className="ml-2">How to collect rewards?</p>
-        </Button>
-        <div className="w-full flex flex-1 justify-start items-center">
-          <div className="bg-[rgba(190,81,5,0.7)] px-4 py-2 rounded-xl flex items-center">
-            <div>
-              <TriangleAlert size={32} className="mr-4" />
-            </div>
-            <div>
-              <p>You can collect rewards only once every 24 hours.</p>
-            </div>
           </div>
-        </div>
-        <div className="flex-grow flex items-start justify-start mt-6">
-          <div className="w-full max-w-md p-6 rounded-lg shadow-lg bg-[rgba(0,0,0,0.7)]">
-            <h1 className="text-2xl font-semibold mb-6 text-center text-primary">
-              Collect rewards
-            </h1>
-            <div className="space-y-4">
-              {isLoading ? (
-                <div>Loading...</div>
+
+          {isLoading ? (
+            <Button disabled className="w-full">
+              Processing...
+            </Button>
+          ) : (
+            <Button
+              onClick={onMakeMoneyClick}
+              disabled={isDisabled}
+              className="w-full"
+              variant="secondary"
+            >
+              {isDisabled ? (
+                <div className="flex items-center">
+                  <Timer className="mr-2 h-4 w-4" />
+                  Come Back Later
+                </div>
               ) : (
-                <Button
-                  onClick={onMakeMoneyClick}
-                  disabled={isDisabled}
-                  className="w-full"
-                >
-                  Collect daily rewards {dailyIncome} USDC
-                </Button>
+                `Collect ${dailyIncome} USDC`
               )}
-            </div>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-6 relative rounded-xl border-2 border-orange-900/50 transition-all p-4 md:p-6 backdrop-blur-sm bg-orange-500/5">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <h3 className="font-semibold text-orange-400 mb-1">
+              Collection Rules
+            </h3>
+            <p className="text-sm text-orange-300/80">
+              You can collect rewards only once every 24 hours. Make sure to
+              come back daily to maximize your earnings!
+            </p>
           </div>
         </div>
-        <div className="mt-6">
-          <h1 className="text-3xl">
-            Package Earnings ({earnings.length || 0})
-          </h1>
-          <h2 className="text-2xl">
-            Total earned amount:{' '}
-            <span className="font-semibold underline text-green-500">
+      </div>
+
+      <Button
+        variant="ghost"
+        className="mt-6 text-sm text-gray-400 hover:text-gray-300"
+        onClick={onHowToCollectYourRewardsClick}
+      >
+        <CircleHelp className="mr-2 h-4 w-4" />
+        How to collect rewards?
+      </Button>
+
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg md:text-xl font-bold">
+            Package Earnings History
+          </h2>
+          <p className="text-sm text-gray-400">
+            Total earned:{' '}
+            <span className="text-green-500 font-semibold">
               {totalEarnedAmount} USDC
             </span>
-          </h2>
-          <AppDataGrid
-            data={earnings}
-            columns={packageEarningsColumns}
-            totalItems={earnings.length || 0}
-            pageSize={limit}
-            currentPage={page}
-            onPageChange={onPageChange}
-            entityName="Package earnings"
-            showColumnsSelect={false}
-          />
+          </p>
         </div>
+
+        <AppDataGrid
+          data={earnings}
+          columns={packageEarningsColumns}
+          totalItems={earnings.length || 0}
+          pageSize={limit}
+          currentPage={page}
+          onPageChange={onPageChange}
+          entityName="Package earnings"
+          showColumnsSelect={false}
+        />
       </div>
     </div>
   );

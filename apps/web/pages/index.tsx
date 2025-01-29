@@ -38,7 +38,7 @@ export default function HomePage(props: any) {
           <h1 className="text-4xl font-bold">Join the global GPU market</h1>
           <div className="text-center my-4 w-full">
             <p>
-              Join Betamine cloud, the only company aiming to simplify the GPU
+              Join Tretamine cloud, the only company aiming to simplify the GPU
               rental services.
             </p>
             <p>Innovating crypto currency mining into a click of a button</p>
@@ -61,7 +61,7 @@ export default function HomePage(props: any) {
         <div className="flex flex-col flex-1 items-center justify-center my-12 py-6 bg-[rgba(0,0,0,0.7)]">
           <h1 className="text-4xl font-bold">How we do it?</h1>
           <p className="text-center w-1/2 my-4 max-[1000px]:w-full">
-            Explore Betamine's global network and open a new revenue for your
+            Explore Tretamine's global network and open a new revenue for your
             idle GPU hardware. We directly connect your hardware to the most
             profitable cryptocurrency pools automatically or by making them
             available for our users for rent and mine instead of you.
@@ -73,7 +73,7 @@ export default function HomePage(props: any) {
             Do you have GPU's in a datacenter?
           </h1>
           <p className="text-center w-1/2 mt-4 mb-2 max-[1000px]:w-full">
-            Betamine verifies and showcases hosting partners who operate
+            Tretamine verifies and showcases hosting partners who operate
             server-grade equipment within professionally managed datacenter
             environments. This way we <b>ensure</b> that our customers are
             receiving <b>enterprise level security and stability.</b>
@@ -93,12 +93,12 @@ export default function HomePage(props: any) {
           <HomePageInfoBox
             icon={<Bitcoin size={42} />}
             title="Earn continuously"
-            description="Fill in your downtime by listing your GPUs to Betamine."
+            description="Fill in your downtime by listing your GPUs to Tretamine."
           />
           <HomePageInfoBox
             icon={<Globe size={42} />}
             title="Get a global customer base"
-            description="Betamine's network brings a worldwide customer base. A simple
+            description="Tretamine's network brings a worldwide customer base. A simple
               method to increase your market without any additional marketing
               expenses."
           />
@@ -110,7 +110,7 @@ export default function HomePage(props: any) {
           <p className="w-1/2 text-center max-[1000px]:w-full">
             Transform your mining farm into a GPU training center and start
             earning. Whether you are a small-scale GPU owner or run a
-            full-fledged GPU farm, Betamine is your platform for turning your
+            full-fledged GPU farm, Tretamine is your platform for turning your
             GPUs into a profitable business.
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function HomePage(props: any) {
                 </h3>
                 <p className="w-1/2 max-[1000px]:w-full max-[1000px]:text-center">
                   GPUs are costly. Make yours work for you when you are not
-                  using it. Apply and rent it to others via Betamine clouds
+                  using it. Apply and rent it to others via Tretamine clouds
                   network.
                 </p>
               </div>
@@ -158,7 +158,7 @@ export default function HomePage(props: any) {
                   Safe and secure
                 </h3>
                 <p className="w-1/2 max-[1000px]:w-full max-[1000px]:text-center">
-                  Your GPUs are valuable and we treat them that way. Betamine
+                  Your GPUs are valuable and we treat them that way. Tretamine
                   offers a secure platform where your hardware is protected.
                 </p>
               </div>
@@ -167,9 +167,9 @@ export default function HomePage(props: any) {
                   Transparent process
                 </h3>
                 <p className="w-1/2 max-[1000px]:w-full max-[1000px]:text-center">
-                  With Betamine renting out your GPU is straightforward. Contact
-                  us at: <b>betamine@email.com</b>, so we can handle all the
-                  technicalities and enjoy the return.
+                  With Tretamine renting out your GPU is straightforward.
+                  Contact us at: <b>tretamine@email.com</b>, so we can handle
+                  all the technicalities and enjoy the return.
                 </p>
               </div>
               <Button onClick={() => router.push('/collect')}>
@@ -187,7 +187,7 @@ export default function HomePage(props: any) {
             Do not let idle time loose you money
           </h2>
           <p className="text-center w-1/2 mt-4 mb-2 max-[1000px]:w-full">
-            Betamine's prices are calculated per GPU, in case of multi GPU
+            Tretamine's prices are calculated per GPU, in case of multi GPU
             instances, the price is divided by the number of GPUs on the
             instance.
           </p>

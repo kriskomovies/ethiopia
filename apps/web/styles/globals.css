@@ -7,6 +7,7 @@
 
 .rd3t-tree-container {
   background: transparent !important;
+  height: 90% !important;
 }
 
 .rd3t-link {
@@ -53,8 +54,13 @@ foreignObject > div {
 
 /* Loading state animation */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .loading-text {
@@ -68,7 +74,7 @@ foreignObject > div {
 
 /* Adjust connection points */
 .rd3t-node circle {
-  opacity: 0;  /* Hide the connection point circles */
+  opacity: 0; /* Hide the connection point circles */
 }
 
 /* Make vertical lines longer */
@@ -83,4 +89,4 @@ foreignObject > div {
   stroke: #ffffff !important;
   stroke-width: 1px !important;
   fill: none !important;
-} 
+}

@@ -38,7 +38,9 @@ const WithdrawalsPage = (): ReactNode => {
 
   return (
     <div className="mt-6">
-      <h1 className="text-3xl">Withdrawal Requests</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
+        Withdrawal Requests
+      </h1>
       <div className="flex gap-4 my-4 items-center">
         <UncontrolledAppSelect
           dropdownOptions={[

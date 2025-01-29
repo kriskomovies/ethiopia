@@ -71,11 +71,6 @@ const items: ISidebarItem[] = [
     url: '/packages',
     icon: 'package',
   },
-  {
-    title: 'Customer Service',
-    url: '/customer-service',
-    icon: 'hand-helping',
-  },
 ];
 
 const AppSidebar = (): ReactNode => {

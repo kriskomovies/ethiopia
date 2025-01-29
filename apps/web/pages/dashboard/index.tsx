@@ -15,15 +15,19 @@ import { useDispatch } from 'react-redux';
 import { useGetTotalWithdrawalsQuery } from '@/redux/services/withdrawals.service';
 import { packageEarningsColumns } from '@/components/package-earnings/package-earnings';
 
+const MEMBERS_PER_PAGE = 5;
+
 const Dashboard = (): ReactNode => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { user } = useAppSelector((store) => store.appState);
-  const { page, limit } = useAppSelector((state) => state.taxDataGrid);
+  const { page } = useAppSelector((state) => state.taxDataGrid);
+
   const { data: withdrawalData } = useGetTotalWithdrawalsQuery(
     { userId: user?.id },
     { skip: !user?.id },
   );
+
   const { data, refetch, isLoading } = useGetUserByIdQuery(
     { id: user.id },
     { skip: !user?.id },
@@ -43,15 +47,21 @@ const Dashboard = (): ReactNode => {
   };
 
   const currentUser = data.user;
-  const members = membersData?.members || [];
-  const paginatedMembers = members.slice(page * limit, (page + 1) * limit);
+  const allMembers = membersData?.members || [];
+
+  // Calculate pagination
+  const startIndex = page * MEMBERS_PER_PAGE;
+  const endIndex = startIndex + MEMBERS_PER_PAGE;
+  const paginatedMembers = allMembers.slice(startIndex, endIndex);
 
   const { lastActivity, balance, membership, earnings } = currentUser;
 
   return (
     <>
       <div className="mb-6 mt-6">
-        <h1 className="text-3xl">Investment</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
+          Investment
+        </h1>
         <div className="my-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2">
           <InfoBox
             title="Active package"
@@ -82,16 +92,16 @@ const Dashboard = (): ReactNode => {
         </div>
       </div>
       <div>
-        <h1 className="text-3xl">Team ({members.length || 0})</h1>
+        <h1 className="text-3xl">Team ({allMembers.length})</h1>
         <AppDataGrid
-          data={paginatedMembers.slice(0, 5)}
+          data={paginatedMembers}
           columns={teamColumns}
-          totalItems={members.length}
-          pageSize={5}
+          totalItems={allMembers.length}
+          pageSize={MEMBERS_PER_PAGE}
           currentPage={page}
           onPageChange={onPageChange}
-          entityName="transactions"
-          showPagination={false}
+          entityName="members"
+          showPagination={true}
           showColumnsSelect={false}
         />
         <div className="w-full flex justify-center items-center my-4">

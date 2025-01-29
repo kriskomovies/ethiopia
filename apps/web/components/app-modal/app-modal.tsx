@@ -111,7 +111,7 @@ const AppModal = (): ReactNode => {
       <AlertDialog open={isOpen}>
         <AlertDialogContent className="bg-black">
           <AlertDialogHeader className="text-white font-semibold text-2xl">
-            Betamine Packages
+            Tretamine Packages
           </AlertDialogHeader>
           <AlertDialogDescription className="text-white overflow-x-auto">
             <ExampleTable />
