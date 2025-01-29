@@ -1,0 +1,86 @@
+.rd3t-link {
+  stroke: #ffffff !important;
+  opacity: 0.7 !important;
+  fill: none !important;
+  stroke-linecap: round !important;
+}
+
+.rd3t-tree-container {
+  background: transparent !important;
+}
+
+.rd3t-link {
+  transition: all 0.3s ease;
+}
+
+.rd3t-node {
+  transition: all 0.3s ease;
+}
+
+/* Target the path elements directly */
+path.rd3t-link {
+  stroke: #ffffff !important;
+  stroke-width: 1.5px !important;
+  fill: none !important;
+  stroke-linecap: round !important;
+}
+
+/* Make connection lines more organized */
+.rd3t-link-vertical path,
+.rd3t-link-horizontal path {
+  stroke: #ffffff !important;
+  stroke-width: 1.5px !important;
+  fill: none !important;
+  stroke-linecap: round !important;
+}
+
+/* Ensure transparent background */
+foreignObject > div {
+  background: transparent !important;
+}
+
+/* Hover effects */
+.rd3t-node:hover .rd3t-link {
+  opacity: 1 !important;
+  stroke-width: 2px !important;
+}
+
+/* Tree container styles */
+.rd3t-tree-container {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Loading state animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading-text {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Remove right angles and make curves smoother */
+.rd3t-link-elbow {
+  display: none;
+}
+
+/* Adjust connection points */
+.rd3t-node circle {
+  opacity: 0;  /* Hide the connection point circles */
+}
+
+/* Make vertical lines longer */
+.rd3t-link-vertical path {
+  stroke: #ffffff !important;
+  stroke-width: 1px !important;
+  fill: none !important;
+}
+
+/* Make horizontal lines connect properly */
+.rd3t-link-horizontal path {
+  stroke: #ffffff !important;
+  stroke-width: 1px !important;
+  fill: none !important;
+} 
