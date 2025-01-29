@@ -728,6 +728,10 @@ body {
   bottom: 0px;
 }
 
+.-top-3 {
+  top: -0.75rem;
+}
+
 .bottom-0 {
   bottom: 0px;
 }
@@ -742,6 +746,10 @@ body {
 
 .left-1 {
   left: 0.25rem;
+}
+
+.left-1\/2 {
+  left: 50%;
 }
 
 .left-10 {
@@ -896,6 +904,10 @@ body {
 
 .mb-6 {
   margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
 }
 
 .ml-2 {
@@ -1203,10 +1215,6 @@ body {
   max-width: 350px;
 }
 
-.max-w-\[400px\] {
-  max-width: 400px;
-}
-
 .max-w-full {
   max-width: 100%;
 }
@@ -1380,8 +1388,8 @@ body {
   gap: 1rem;
 }
 
-.gap-8 {
-  gap: 2rem;
+.gap-6 {
+  gap: 1.5rem;
 }
 
 .space-x-1 > :not([hidden]) ~ :not([hidden]) {
@@ -1424,6 +1432,12 @@ body {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
+}
+
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
 }
 
 .space-y-4 > :not([hidden]) ~ :not([hidden]) {
@@ -1529,6 +1543,10 @@ body {
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
 }
 
+.border-blue-500\/50 {
+  border-color: rgb(59 130 246 / 0.5);
+}
+
 .border-destructive {
   border-color: hsl(var(--destructive));
 }
@@ -1618,6 +1636,10 @@ body {
   background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
 }
 
+.bg-blue-500\/20 {
+  background-color: rgb(59 130 246 / 0.2);
+}
+
 .bg-border {
   background-color: hsl(var(--border));
 }
@@ -1687,6 +1709,10 @@ body {
 
 .bg-transparent {
   background-color: transparent;
+}
+
+.bg-white\/5 {
+  background-color: rgb(255 255 255 / 0.05);
 }
 
 .bg-yellow-500 {
@@ -1825,10 +1851,6 @@ body {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
-}
-
-.pb-2 {
-  padding-bottom: 0.5rem;
 }
 
 .pl-2 {
@@ -2386,6 +2408,10 @@ body {
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:border-white\/20:hover {
+  border-color: rgb(255 255 255 / 0.2);
 }
 
 .hover\:border-white\/30:hover {
@@ -3392,6 +3418,10 @@ body {
 
   .lg\:w-\[50\%\] {
     width: 50%;
+  }
+
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .lg\:grid-cols-5 {
